@@ -1,0 +1,10 @@
+{
+  "name": "署名パッド",
+  "short_name": "署名",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f7f3ea",
+  "theme_color": "#f7f3ea",
+  "orientation": "portrait",
+  "lang": "ja"
+}
