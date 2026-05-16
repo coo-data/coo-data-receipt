@@ -6,10 +6,11 @@ const sizeInput = document.querySelector("#sizeInput");
 const clearButton = document.querySelector("#clearButton");
 const saveButton = document.querySelector("#saveButton");
 const undoButton = document.querySelector("#undoButton");
-const shareMethod = document.querySelector("#shareMethod");
 const recordDate = document.querySelector("#recordDate");
 const personInCharge = document.querySelector("#personInCharge");
+const shareDetail = document.querySelector("#shareDetail");
 const agreementNote = document.querySelector("#agreementNote");
+const shareMethodInputs = document.querySelectorAll("input[name='shareMethod']");
 const dataContentInputs = document.querySelectorAll("input[name='dataContent']");
 const swatches = document.querySelectorAll(".swatch");
 const ctx = canvas.getContext("2d");
@@ -128,11 +129,19 @@ function selectedText(select) {
   return select.options[select.selectedIndex]?.text || "";
 }
 
-function selectedDataContent() {
-  const selected = Array.from(dataContentInputs)
+function checkedValues(inputs) {
+  const selected = Array.from(inputs)
     .filter((input) => input.checked)
     .map((input) => input.value);
   return selected.length ? selected.join(" / ") : "未選択";
+}
+
+function selectedShareMethods() {
+  return checkedValues(shareMethodInputs);
+}
+
+function selectedDataContent() {
+  return checkedValues(dataContentInputs);
 }
 
 function formatDisplayDate(value) {
@@ -161,12 +170,35 @@ function drawTextBlock(context, text, x, y, maxWidth, lineHeight) {
   return currentY;
 }
 
+function drawInfoBlock(context, label, value, x, y, maxWidth) {
+  context.font = "600 30px sans-serif";
+  return drawTextBlock(context, `${label}: ${value}`, x, y, maxWidth, 42) + 16;
+}
+
+function drawImageContain(context, image, x, y, width, height) {
+  const imageRatio = image.width / image.height;
+  const frameRatio = width / height;
+  let drawWidth = width;
+  let drawHeight = height;
+
+  if (imageRatio > frameRatio) {
+    drawHeight = width / imageRatio;
+  } else {
+    drawWidth = height * imageRatio;
+  }
+
+  const drawX = x + (width - drawWidth) / 2;
+  const drawY = y + (height - drawHeight) / 2;
+  context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+}
+
 function createExportCanvas(date) {
   const exportCanvas = document.createElement("canvas");
   const exportCtx = exportCanvas.getContext("2d");
   const width = 1200;
-  const height = 1120;
+  const height = 1240;
   const padding = 72;
+  const maxWidth = width - padding * 2;
 
   exportCanvas.width = width;
   exportCanvas.height = height;
@@ -181,11 +213,18 @@ function createExportCanvas(date) {
   exportCtx.font = "700 28px sans-serif";
   exportCtx.fillText(`署名依頼元: ${COMPANY_NAME}`, padding, 142);
 
-  exportCtx.font = "600 30px sans-serif";
-  exportCtx.fillText(`日付: ${formatDisplayDate(date)}`, padding, 206);
-  exportCtx.fillText(`担当者: ${selectedText(personInCharge)}`, padding, 260);
-  exportCtx.fillText(`共有方法: ${selectedText(shareMethod)}`, padding, 314);
-  exportCtx.fillText(`データ内容: ${selectedDataContent()}`, padding, 368);
+  exportCtx.fillStyle = "#171717";
+  let cursorY = 206;
+  cursorY = drawInfoBlock(exportCtx, "日付", formatDisplayDate(date), padding, cursorY, maxWidth);
+  cursorY = drawInfoBlock(exportCtx, "担当者", selectedText(personInCharge), padding, cursorY, maxWidth);
+  cursorY = drawInfoBlock(exportCtx, "共有方法", selectedShareMethods(), padding, cursorY, maxWidth);
+
+  const detailText = shareDetail.value.trim();
+  if (detailText) {
+    cursorY = drawInfoBlock(exportCtx, "共有詳細", detailText, padding, cursorY, maxWidth);
+  }
+
+  cursorY = drawInfoBlock(exportCtx, "データ内容", selectedDataContent(), padding, cursorY, maxWidth);
 
   exportCtx.fillStyle = "#333333";
   exportCtx.font = "500 25px sans-serif";
@@ -193,14 +232,14 @@ function createExportCanvas(date) {
     exportCtx,
     agreementNote.textContent.trim(),
     padding,
-    438,
-    width - padding * 2,
+    cursorY + 28,
+    maxWidth,
     38
   );
 
   const signatureX = padding;
-  const signatureY = Math.max(570, noteEndY + 70);
-  const signatureWidth = width - padding * 2;
+  const signatureY = Math.max(700, noteEndY + 70);
+  const signatureWidth = maxWidth;
   const signatureHeight = 410;
 
   exportCtx.strokeStyle = "#d7d7d7";
@@ -211,7 +250,7 @@ function createExportCanvas(date) {
   exportCtx.font = "600 24px sans-serif";
   exportCtx.fillText("署名", signatureX, signatureY - 18);
 
-  exportCtx.drawImage(canvas, signatureX + 24, signatureY + 24, signatureWidth - 48, signatureHeight - 48);
+  drawImageContain(exportCtx, canvas, signatureX + 24, signatureY + 24, signatureWidth - 48, signatureHeight - 48);
 
   return exportCanvas;
 }
@@ -219,7 +258,7 @@ function createExportCanvas(date) {
 function savePng() {
   const link = document.createElement("a");
   const date = recordDate.value || new Date().toISOString().slice(0, 10);
-  link.download = `coo-data-receipt-${personInCharge.value}-${shareMethod.value}-${date}.png`;
+  link.download = `coo-data-receipt-${personInCharge.value}-${date}.png`;
   link.href = createExportCanvas(date).toDataURL("image/png");
   link.click();
 }
