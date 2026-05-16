@@ -31,16 +31,21 @@
               <option value="yasuda">安田</option>
             </select>
           </label>
-
-          <label class="field">
-            <span>共有方法</span>
-            <select id="shareMethod" aria-label="データの共有方法">
-              <option value="sd-card">SDカード</option>
-              <option value="ssd">SSD</option>
-              <option value="gigafile">ギガファイル</option>
-            </select>
-          </label>
         </div>
+
+        <fieldset class="content-field" aria-label="共有方法">
+          <legend>共有方法</legend>
+          <label><input type="checkbox" name="shareMethod" value="SDカード"> SDカード</label>
+          <label><input type="checkbox" name="shareMethod" value="SSD"> SSD</label>
+          <label><input type="checkbox" name="shareMethod" value="ギガファイル"> ギガファイル</label>
+          <label><input type="checkbox" name="shareMethod" value="S×S"> S×S</label>
+          <label><input type="checkbox" name="shareMethod" value="その他"> その他</label>
+        </fieldset>
+
+        <label class="field detail-field">
+          <span>共有方法の詳細</span>
+          <textarea id="shareDetail" rows="3" placeholder="例：SDカード2枚、SSD 1台、ギガファイルURL、S×S案件名など"></textarea>
+        </label>
 
         <fieldset class="content-field" aria-label="データ内容">
           <legend>データ内容</legend>
