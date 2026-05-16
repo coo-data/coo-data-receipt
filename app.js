@@ -171,8 +171,11 @@ function drawTextBlock(context, text, x, y, maxWidth, lineHeight) {
 }
 
 function drawInfoBlock(context, label, value, x, y, maxWidth) {
+  const lineHeight = 44;
+  const blockGap = 18;
   context.font = "600 30px sans-serif";
-  return drawTextBlock(context, `${label}: ${value}`, x, y, maxWidth, 42) + 16;
+  const lastLineY = drawTextBlock(context, `${label}: ${value}`, x, y, maxWidth, lineHeight);
+  return lastLineY + lineHeight + blockGap;
 }
 
 function drawImageContain(context, image, x, y, width, height) {
